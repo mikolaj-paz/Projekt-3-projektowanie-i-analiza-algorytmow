@@ -1,0 +1,79 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# CMakeTools
+.vscode-test/
+build/
+dist/
+node_modules/
+out/
+test/fakebin/
+test/**/log.txt
+test/**/bin
+vscode-extensions-localization-export/
+vscode-translations-import/
+jobs/loc/LCL
+OneLocBuild
+.ci-build
+.DS_Store
+debug.log
+npm-debug.log
+package-lock.json
+test.txt
+*.backup
+*.db*
+*.log
+*.vsix
+**/.vscode/CMakeTools
+**/nls.*.json
+**/*.nls.json
+**/*.nls.*.json
+
+# VSCode data
+.vscode/
+
+# Data
+*.csv
