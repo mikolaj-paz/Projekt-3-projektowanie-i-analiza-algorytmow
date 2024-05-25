@@ -5,9 +5,15 @@ find_package(OpenGL REQUIRED)
 
 add_subdirectory( "lib/glfw" )
 add_subdirectory( "lib/glad" )
+add_subdirectory( "lib/glm" )
 
-add_executable( a WIN32 "src/main.cpp" )
+add_executable( a WIN32 
+                "src/main.cpp"
+                "src/shader.cpp"
+                "src/texture.cpp"
+                "src/resource_manager.cpp"
+                "src/game_manager.cpp" )
 
 # target_link_options(a PRIVATE "-lopengl32" )
 
-target_link_libraries( a glfw glad )
+target_link_libraries( a glfw glad glm )
