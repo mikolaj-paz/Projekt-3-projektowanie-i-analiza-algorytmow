@@ -12,6 +12,7 @@ add_executable( a WIN32
                 "src/shader.cpp"
                 "src/texture.cpp"
                 "src/resource_manager.cpp"
+                "src/sprite_renderer.cpp"
                 "src/game_manager.cpp" )
 
 # target_link_options(a PRIVATE "-lopengl32" )

@@ -22,13 +22,15 @@ class ResourceManager
     public:
         ResourceManager() = delete;
         
-        static Shader loadShader(const char *vShaderFile, const char *fShaderFile, std::string name);
+        static Shader& loadShader(const char *vShaderFile, const char *fShaderFile, std::string name);
         
-        static Shader getShader(std::string name);
+        static Shader& getShader(std::string name);
+
+        static Texture2D& loadQuad(const int& width, std::string name);
         
-        static Texture2D loadTexture(const char *file, bool alpha, std::string name);
+        static Texture2D& loadTexture(const char *file, bool alpha, std::string name);
         
-        static Texture2D getTexture(std::string name);
+        static Texture2D& getTexture(std::string name);
         
         static void clear();
 
@@ -37,6 +39,8 @@ class ResourceManager
         static std::map<std::string, Texture2D> Textures;
         
         static Shader loadShaderFromFile(const char *vShaderFile, const char *fShaderFile);
+
+        static Texture2D loadEmptyQuad(const int& width);
 
         static Texture2D loadTextureFromFile(const char *file, bool alpha);
 };

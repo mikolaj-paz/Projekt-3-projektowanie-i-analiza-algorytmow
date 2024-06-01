@@ -10,24 +10,30 @@
 std::map<std::string, Texture2D> ResourceManager::Textures;
 std::map<std::string, Shader> ResourceManager::Shaders;
 
-Shader ResourceManager::loadShader(const char *vShaderFile, const char *fShaderFile, std::string name)
+Shader& ResourceManager::loadShader(const char *vShaderFile, const char *fShaderFile, std::string name)
 {
     Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile);
     return Shaders[name];
 }
 
-Shader ResourceManager::getShader(std::string name)
+Shader& ResourceManager::getShader(std::string name)
 {
     return Shaders[name];
 }
 
-Texture2D ResourceManager::loadTexture(const char *file, bool alpha, std::string name)
+Texture2D& ResourceManager::loadQuad(const int& width, std::string name)
+{
+    Textures[name] = loadEmptyQuad(width);
+    return Textures[name];
+}
+
+Texture2D& ResourceManager::loadTexture(const char *file, bool alpha, std::string name)
 {
     Textures[name] = loadTextureFromFile(file, alpha);
     return Textures[name];
 }
 
-Texture2D ResourceManager::getTexture(std::string name)
+Texture2D& ResourceManager::getTexture(std::string name)
 {
     return Textures[name];
 }
@@ -47,7 +53,6 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
     std::string fragmentCode;
-    std::string geometryCode;
     try
     {
         // open files
@@ -70,11 +75,26 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
     }
     const char *vShaderCode = vertexCode.c_str();
     const char *fShaderCode = fragmentCode.c_str();
-    const char *gShaderCode = geometryCode.c_str();
     // 2. now create shader object from source code
     Shader shader;
     shader.compile(vShaderCode, fShaderCode);
     return shader;
+}
+
+Texture2D ResourceManager::loadEmptyQuad(const int& width)
+{
+    Texture2D texture;
+    
+    unsigned char data[width * width * 4];
+    for (auto & i : data)
+        i = 255;
+
+    texture.setInternalFormat(GL_RGBA8);
+    texture.setImageFormat(GL_RGBA);
+
+    texture.generate(width, width, data);
+
+    return texture;
 }
 
 Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha)

@@ -42,6 +42,9 @@ int main()
     // Ustawienie okna roboczego
     glViewport(0, 0, INIT_WIDTH, INIT_WIDTH);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // Ustawienie funckji wykonujacej sie przy zmianie rozmiaru okna
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
