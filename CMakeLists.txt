@@ -9,6 +9,7 @@ add_subdirectory( "lib/glm" )
 
 add_executable( a WIN32 
                 "src/main.cpp"
+                "src/board.cpp"
                 "src/shader.cpp"
                 "src/texture.cpp"
                 "src/resource_manager.cpp"

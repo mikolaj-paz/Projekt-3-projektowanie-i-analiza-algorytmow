@@ -1,11 +1,16 @@
+#include <string>
+
 #include "game_manager.hpp"
 #include "resource_manager.hpp"
 #include "sprite_renderer.hpp"
+
+#include "board.hpp"
 
 #define DARK_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .82f
 #define LIGHT_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .55f 
 
 SpriteRenderer *Renderer;
+Board *board;
 
 void GameManager::init()
 {
@@ -18,14 +23,34 @@ void GameManager::init()
     ResourceManager::getShader("sprite").setMatrix4("projection", projection);
     // set render-specific controls
     Renderer = new SpriteRenderer(ResourceManager::getShader("sprite"));
-    // load textures
-    ResourceManager::loadTexture("../assets/00_pieces.png", true, "pieces");
-    ResourceManager::loadQuad(this->getWidth() / 8, "square");
+
+    // Tworzenie szachownicy
+    board = new Board();
+
+    // Ladowanie tekstur
+
+        // Ladowanie figur
+        ResourceManager::loadTexture("../assets/00_pieces.png", true, "9");
+        ResourceManager::loadTexture("../assets/01_pieces.png", true, "14");
+        ResourceManager::loadTexture("../assets/02_pieces.png", true, "12");
+        ResourceManager::loadTexture("../assets/03_pieces.png", true, "11");
+        ResourceManager::loadTexture("../assets/04_pieces.png", true, "13");
+        ResourceManager::loadTexture("../assets/05_pieces.png", true, "10");
+        ResourceManager::loadTexture("../assets/06_pieces.png", true, "17");
+        ResourceManager::loadTexture("../assets/07_pieces.png", true, "22");
+        ResourceManager::loadTexture("../assets/08_pieces.png", true, "20");
+        ResourceManager::loadTexture("../assets/09_pieces.png", true, "19");
+        ResourceManager::loadTexture("../assets/10_pieces.png", true, "21");
+        ResourceManager::loadTexture("../assets/11_pieces.png", true, "18");
+
+        // Ladowanie pola
+        ResourceManager::loadQuad(this->getWidth() / 8, "square");
 }
 
 GameManager::~GameManager()
 {
     delete Renderer;
+    delete board;
 }
 
 void GameManager::processInput(float deltaTime)
@@ -46,13 +71,20 @@ void GameManager::render()
     for (int j = 0; j < 8; j++)
     {
         for (int i = 0; i < 8; i++)
+        {
+            // Rysowanie pola
             Renderer->drawSprite(ResourceManager::getTexture("square"), 
                                  glm::vec2(i * xStep, j * yStep),
                                  glm::vec2(this->getWidth() / 8, this->getHeight() / 8),
                                  .0f,
                                  (i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR);
+            
+            // // Rysowanie adekwatnej figury
+            const int* const squares = board->get();
+            if (squares[63 - (j * 8 + (7 - i))] != 0)
+                Renderer->drawSprite(ResourceManager::getTexture(std::to_string(squares[63 - (j * 8 + (7 - i))])),
+                                     glm::vec2(i * xStep, j * yStep),
+                                     glm::vec2(this->getWidth() / 8, this->getHeight() / 8));
+        }
     }
-
-    Renderer->drawSprite(ResourceManager::getTexture("pieces"), glm::vec2(200.0f, 200.0f), glm::vec2(171.0f, 171.0f));
-    
 }
