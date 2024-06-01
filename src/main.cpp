@@ -8,6 +8,9 @@
 
 #define INIT_WIDTH 600
 
+// Funkcja wykonujaca sie przy przycisnieciu przycisku myszy
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+
 // Funkcja wykonujaca sie przy zmianie rozmiaru okna
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -45,7 +48,10 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Ustawienie funckji wykonujacej sie przy zmianie rozmiaru okna
+    // Ustawienie funkcji wykonujacej sie przy przycisnieciu przycisku myszy
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+
+    // Ustawienie funkcji wykonujacej sie przy zmianie rozmiaru okna
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     gameManager.init();
@@ -63,6 +69,7 @@ int main()
         glfwPollEvents();
 
         // Wejscia
+        glfwGetCursorPos(window, &(gameManager.mouseX), &(gameManager.mouseY));
         gameManager.processInput(deltaTime);
 
         // Odswiezenie klatki
@@ -80,6 +87,17 @@ int main()
 
     glfwTerminate();
     return 0;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == 0 || button == 1)
+    {
+        if (action == GLFW_PRESS)
+            gameManager.buttons[button] = true;
+        else if (action == GLFW_RELEASE)
+            gameManager.buttons[button] = false;
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)

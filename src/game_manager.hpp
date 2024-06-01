@@ -10,6 +10,10 @@ enum GameState
 class GameManager
 {
     public:
+        double mouseX, mouseY;
+        bool buttons[2];
+
+    public:
         GameManager(const unsigned int& width, const unsigned int& height):
             gameState{GAME_ACTIVE}, width{width}, height{height} {}
 

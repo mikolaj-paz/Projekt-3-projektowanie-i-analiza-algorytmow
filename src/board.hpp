@@ -17,6 +17,9 @@ class Board
         const int* const get() const
             { return squares; }
 
+        void update(const int& square, const int& value)
+            { squares[square] = value; }
+
         void loadFEN(const std::string FENstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     
     private:
