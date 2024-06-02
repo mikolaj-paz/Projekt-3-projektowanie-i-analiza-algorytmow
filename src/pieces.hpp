@@ -4,15 +4,18 @@
 const struct
 {
     const int none = 0;
-    const int king = 1;
-    const int pawn = 2;
-    const int knight = 3;
-    const int bishop = 4;
-    const int rook = 5;
-    const int queen = 6;
+    const int pawn = 1;
+    const int knight = 2;
+    const int bishop = 3;
+    const int rook = 4;
+    const int queen = 5;
+    const int king = 6;
 
-    const int white = 8;
-    const int black = 16;
+    const int white = 0;
+    const int black = 8;
+
+    const int colorMask = 0b1000;
+    const int typeMask = 0b0111;
 } Piece;
 
 #endif

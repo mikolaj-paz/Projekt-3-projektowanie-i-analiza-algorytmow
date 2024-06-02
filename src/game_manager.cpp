@@ -5,11 +5,13 @@
 #include "game_manager.hpp"
 #include "resource_manager.hpp"
 #include "sprite_renderer.hpp"
+#include "move_generator.hpp"
 
 #include "board.hpp"
 
 #define DARK_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .82f
 #define LIGHT_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .55f 
+#define MOVE_SQUARE_COLOR glm::vec3(0.85f, .0f, .0f) 
 
 SpriteRenderer *Renderer;
 Board *board;
@@ -20,8 +22,11 @@ struct
     bool rendered = false;
 
     int x, y;
+    int origin;
 
-    int value;
+    int piece;
+
+    bool* availableMovesBoard;
 } Dummy;
 
 void GameManager::init()
@@ -39,21 +44,24 @@ void GameManager::init()
     // Tworzenie szachownicy
     board = new Board();
 
+    // Kalkulacja ruchow
+    // PrecomputedMoveData::init();
+
     // Ladowanie tekstur
 
         // Ladowanie figur
-        ResourceManager::loadTexture("../assets/00_pieces.png", true, "9");
-        ResourceManager::loadTexture("../assets/01_pieces.png", true, "14");
-        ResourceManager::loadTexture("../assets/02_pieces.png", true, "12");
-        ResourceManager::loadTexture("../assets/03_pieces.png", true, "11");
-        ResourceManager::loadTexture("../assets/04_pieces.png", true, "13");
-        ResourceManager::loadTexture("../assets/05_pieces.png", true, "10");
-        ResourceManager::loadTexture("../assets/06_pieces.png", true, "17");
-        ResourceManager::loadTexture("../assets/07_pieces.png", true, "22");
-        ResourceManager::loadTexture("../assets/08_pieces.png", true, "20");
-        ResourceManager::loadTexture("../assets/09_pieces.png", true, "19");
-        ResourceManager::loadTexture("../assets/10_pieces.png", true, "21");
-        ResourceManager::loadTexture("../assets/11_pieces.png", true, "18");
+        ResourceManager::loadTexture("../assets/00_pieces.png", true, "6");
+        ResourceManager::loadTexture("../assets/01_pieces.png", true, "5");
+        ResourceManager::loadTexture("../assets/02_pieces.png", true, "3");
+        ResourceManager::loadTexture("../assets/03_pieces.png", true, "2");
+        ResourceManager::loadTexture("../assets/04_pieces.png", true, "4");
+        ResourceManager::loadTexture("../assets/05_pieces.png", true, "1");
+        ResourceManager::loadTexture("../assets/06_pieces.png", true, "14");
+        ResourceManager::loadTexture("../assets/07_pieces.png", true, "13");
+        ResourceManager::loadTexture("../assets/08_pieces.png", true, "11");
+        ResourceManager::loadTexture("../assets/09_pieces.png", true, "10");
+        ResourceManager::loadTexture("../assets/10_pieces.png", true, "12");
+        ResourceManager::loadTexture("../assets/11_pieces.png", true, "9");
 
         // Ladowanie pola
         ResourceManager::loadQuad(this->getWidth() / 8, "square");
@@ -72,20 +80,32 @@ void GameManager::processInput(float deltaTime)
 
     if (Dummy.render != Dummy.rendered)
     {
+        Dummy.y = mouseY / (this->getHeight() / 8);
+        Dummy.x = mouseX / (this->getWidth() / 8);
+
         if (Dummy.render)
         {
-            Dummy.y = mouseY / (this->getHeight() / 8);
-            Dummy.x = mouseX / (this->getWidth() / 8);
+            // Drag
 
-            if (board->get()[63 - (Dummy.y * 8 + (7 - Dummy.x))] == 0) 
+            Dummy.origin = 63 - (Dummy.y * 8 + (7 - Dummy.x));
+            Dummy.piece = board->get()[Dummy.origin];
+            if (Dummy.piece == 0) 
             {
                 Dummy.render = false;
                 return;
             }
+            else
+                Dummy.availableMovesBoard = MoveGenerator::getLegalMoves(board, Dummy.origin, Dummy.piece);
         }
         else
         {
-            
+            // Drop
+
+            int target = 63 - (Dummy.y * 8 + (7 - Dummy.x));
+            if (Dummy.availableMovesBoard[target])
+                board->update(Move(Dummy.origin, target, Dummy.piece));
+
+            delete[] Dummy.availableMovesBoard;
         }
     }
 }
@@ -109,7 +129,7 @@ void GameManager::render()
                                  glm::vec2(i * sizeX, j * sizeY),
                                  glm::vec2(sizeX, sizeY),
                                  .0f,
-                                 (i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR);
+                                 ((i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR) * (Dummy.render && Dummy.availableMovesBoard[63 - (j * 8 + (7 - i))] ? MOVE_SQUARE_COLOR : glm::vec3(1)) );
             
             // // Rysowanie adekwatnej figury
             const int* const squares = board->get();
