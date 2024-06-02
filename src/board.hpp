@@ -24,6 +24,12 @@ class Board
         const Move& getLastMove() const
             { return lastMove; }
 
+        const bool* getCastleK() const
+            { return castleK; }
+
+        const bool* getCastleQ() const
+            { return castleQ; }
+
         void update(const Move move);
 
         const int toMove() const
@@ -33,12 +39,15 @@ class Board
 
         void loadFEN(const std::string FENstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     
+        unsigned long long whiteKingSquare;
+        unsigned long long blackKingSquare;   
     private:
         int* squares;
         bool blackToMove;
 
         bool castleK[2]; // roszada krolewska
         bool castleQ[2]; // roszada hetmanska
+
 
         Move lastMove;
 

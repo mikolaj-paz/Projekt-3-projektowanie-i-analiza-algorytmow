@@ -11,7 +11,9 @@ class Move
         Move(const int& originIndex, const int& targetIndex, const int& piece):
             originSquare{originIndex}, targetSquare{targetIndex}, piece{piece}
         {
-            if ((piece & Piece.typeMask) == Piece.pawn && (abs(targetIndex - originIndex) % 8) != 0)
+            if ((piece & Piece.typeMask) == Piece.king && abs(targetIndex - originIndex) == 2)
+                isCastle = true;
+            else if ((piece & Piece.typeMask) == Piece.pawn && (abs(targetIndex - originIndex) % 8) != 0)
                 isEnPassant = true;
         }
 
@@ -26,12 +28,16 @@ class Move
 
         const bool& enPassant() const
             { return isEnPassant; }
+        
+        const bool& castle() const
+            { return isCastle; }
 
     private:
         int originSquare;
         int targetSquare;
 
         bool isEnPassant = false;
+        bool isCastle = false;
 
         int piece;
 };

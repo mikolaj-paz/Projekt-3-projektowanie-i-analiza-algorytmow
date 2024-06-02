@@ -27,6 +27,7 @@ struct
     int piece;
 
     bool* availableMovesBoard;
+    std::vector<Move> availableMoves;
 } Dummy;
 
 void GameManager::init()
@@ -45,7 +46,7 @@ void GameManager::init()
     board = new Board();
 
     // Kalkulacja ruchow
-    // PrecomputedMoveData::init();
+    PrecomputedMoveData::init();
 
     // Ladowanie tekstur
 
@@ -95,7 +96,16 @@ void GameManager::processInput(float deltaTime)
                 return;
             }
             else
-                Dummy.availableMovesBoard = MoveGenerator::getLegalMoves(board, Dummy.origin, Dummy.piece);
+            {
+                unsigned long long bitboard = 0ULL;
+                Dummy.availableMoves = MoveGenerator::getMoves(board, Dummy.origin, Dummy.piece, &bitboard);
+                // bitboard = MoveGenerator::attackedSquares(board, Dummy.piece & Piece.colorMask);
+
+                Dummy.availableMovesBoard = new bool[64];
+                std::fill(Dummy.availableMovesBoard, Dummy.availableMovesBoard + 64, 0);
+                for (int i = 0; i < 64; i++)
+                    Dummy.availableMovesBoard[i] = ((1ULL << i) & bitboard) >> i;
+            }
         }
         else
         {

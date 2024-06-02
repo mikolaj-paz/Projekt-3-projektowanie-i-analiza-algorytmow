@@ -14,7 +14,9 @@ class MoveGenerator
     public:
         MoveGenerator() = delete;
 
-        static bool* getLegalMoves(const Board* board, int square, int piece);
+        static std::vector<Move> getMoves(const Board* board, int square, int piece, unsigned long long* boolBoard);
+
+        static unsigned long long attackedSquares(const Board* board, const int& friendlyPieceColor);
 
     private:
         static const int directionOffsets[8];
@@ -38,7 +40,8 @@ class MoveGenerator
 
         static unsigned long long generateOrthagonal(const int* board, const int& square, const int& friendlyPieceColor);
         static unsigned long long generateDiagonal(const int* board, const int& square, const int& friendlyPieceColor);
-        static unsigned long long generateKing(const int* board, const int& square, const int& friendlyPieceColor);
+
+        static unsigned long long generateKing(const Board* board, const int& square, const int& friendlyPieceColor);
 
         static unsigned long long generateKnight(const int* board, const int& square, const int& friendlyPieceColor);
 

@@ -9,7 +9,7 @@ add_subdirectory( "lib/glm" )
 
 add_executable( a WIN32 
                 "src/main.cpp"
-                # "src/precomputed_move_data.cpp"
+                "src/precomputed_move_data.cpp"
                 "src/move_generator.cpp"
                 "src/board.cpp"
                 "src/shader.cpp"
