@@ -1,20 +1,41 @@
 #include "board.hpp"
 
-Board::Board(): lastMove{Move(0,0,0)}
+Board::Board(): lastMove{Move(0,0,0)}, whitePiecesBitboard{0ULL}, blackPiecesBitboard{0ULL}
 {
-    squares = new int[64];
-    bitboards = new unsigned long long[64];
-    for (int i = 0; i < 64; i++)
-    {
-        squares[i] = 0;
-        bitboards[i] = 0;
-    }
-
+    std::fill(squares, squares + 64, 0);
     loadFEN();
+}
+
+Board& Board::operator=(const Board& other)
+{
+    if (this == &other)
+        return *this;
+
+    blackToMove = other.blackToMove;
+
+    whiteKingSquare = other.whiteKingSquare;
+    blackKingSquare = other.blackKingSquare;
+
+    whitePiecesBitboard = other.whitePiecesBitboard;
+    blackPiecesBitboard = other.blackPiecesBitboard;
+
+    lastMove = other.lastMove;
+    
+    for (int i = 0; i < 64; i++)
+        squares[i] = other.squares[i];
+
+    castleK[0] = other.castleK[0];
+    castleQ[0] = other.castleQ[0];
+    castleK[1] = other.castleK[1];
+    castleQ[1] = other.castleQ[1];
+
+    return *this;
 }
 
 void Board::update(const Move move)
 {
+    updateBitboards(move);
+
     squares[move.getTarget()] = squares[move.getOrigin()];
     squares[move.getOrigin()] = 0;
 
@@ -91,10 +112,39 @@ void Board::updateBitboards(const Move& move)
     int pieceToMove = squares[move.getOrigin()];
     int pieceToCapture = squares[move.getTarget()];
 
-    bitboards[pieceToMove] ^= 1ULL << move.getOrigin() | 1ULL << move.getTarget();
-    if (pieceToCapture != Piece.none)
+    if ((pieceToMove & Piece.colorMask) == Piece.white)
     {
-        bitboards[pieceToCapture] ^= 1ULL << move.getTarget();
+        if ((pieceToMove & Piece.typeMask) == Piece.king) whiteKingSquare = 1ULL << move.getTarget();
+        whitePiecesBitboard ^= 1ULL << move.getOrigin() | 1ULL << move.getTarget();
+
+        if (pieceToCapture != Piece.none)
+            blackPiecesBitboard ^= 1ULL << move.getTarget();
+        else if (move.castle()) // roszada
+        {
+            if (move.getTarget() == 6) // krolewska
+                whitePiecesBitboard ^= 1ULL << 5 | 1ULL << 7;
+            else // hetmanska
+                whitePiecesBitboard ^= 1ULL << 0 | 1ULL << 3;
+        }
+        else if (move.enPassant())
+            blackPiecesBitboard ^= 1ULL << (move.getTarget() - 8);
+    }
+    else
+    {
+        if ((pieceToMove & Piece.typeMask) == Piece.king) blackKingSquare = 1ULL << move.getTarget();
+        blackPiecesBitboard ^= 1ULL << move.getOrigin() | 1ULL << move.getTarget();
+
+        if (pieceToCapture != Piece.none)
+            whitePiecesBitboard ^= 1ULL << move.getTarget();
+        else if (move.castle()) // roszada
+        {
+            if (move.getTarget() == 62) // krolewska
+                blackPiecesBitboard ^= 1ULL << 61 | 1ULL << 63;
+            else // hetmanska
+                blackPiecesBitboard ^= 1ULL << 56 | 1ULL << 59;
+        }
+        else if (move.enPassant())
+            whitePiecesBitboard ^= 1ULL << (move.getTarget() + 8);
     }
 }
 
@@ -140,7 +190,7 @@ void Board::loadFEN(const std::string FENstring)
                     if (type == Piece.king) whiteKingSquare = 1ULL << (rank * 8 + file);
                 }
                 squares[rank * 8 + file] = type | color;
-                bitboards[type | color] |= 1ULL << rank * 8 + file;
+                (color == Piece.white ? whitePiecesBitboard : blackPiecesBitboard) |= 1ULL << rank * 8 + file;
                 file++;
             }
         }

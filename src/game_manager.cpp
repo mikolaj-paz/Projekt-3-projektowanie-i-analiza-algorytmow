@@ -97,14 +97,21 @@ void GameManager::processInput(float deltaTime)
             }
             else
             {
-                unsigned long long bitboard = 0ULL;
-                Dummy.availableMoves = MoveGenerator::getMoves(board, Dummy.origin, Dummy.piece, &bitboard);
-                // bitboard = MoveGenerator::attackedSquares(board, Dummy.piece & Piece.colorMask);
+                if (board->toMove() == (Dummy.piece & Piece.colorMask))
+                {
+                    unsigned long long bitboard = 0ULL;
+                    Dummy.availableMoves = MoveGenerator::getLegalMoves(board, Dummy.origin, Dummy.piece, &bitboard);
 
-                Dummy.availableMovesBoard = new bool[64];
-                std::fill(Dummy.availableMovesBoard, Dummy.availableMovesBoard + 64, 0);
-                for (int i = 0; i < 64; i++)
-                    Dummy.availableMovesBoard[i] = ((1ULL << i) & bitboard) >> i;
+                    Dummy.availableMovesBoard = new bool[64];
+                    std::fill(Dummy.availableMovesBoard, Dummy.availableMovesBoard + 64, 0);
+                    for (int i = 0; i < 64; i++)
+                        Dummy.availableMovesBoard[i] = ((1ULL << i) & bitboard) >> i;
+                }
+                else
+                {
+                    Dummy.availableMovesBoard = new bool[64];
+                    std::fill(Dummy.availableMovesBoard, Dummy.availableMovesBoard + 64, 0);
+                }
             }
         }
         else

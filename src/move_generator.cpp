@@ -7,13 +7,31 @@ const int MoveGenerator::pawnOffsets[6] = { 7, 8, 9, -9, -8, -7 };
 const unsigned long long MoveGenerator::pawnStart[2] = { 0xFF00, 0xFF000000000000 };
 const unsigned long long MoveGenerator::pawnPromotion[2] = { 0xFF00000000000000, 0xFF };
 
-std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, int piece, unsigned long long* bitboard)
+std::vector<Move> MoveGenerator::getLegalMoves(const Board* board, int square, int piece, unsigned long long* bitboard)
+{
+    std::vector<Move> moves;
+    std::vector<Move> candidates = getMoves(board, square, piece, bitboard);
+
+    for (auto & candidate : candidates)
+    {
+        Board temp = *board;
+        temp.update(candidate);
+        if (!((piece & Piece.colorMask) == Piece.white ? isWhiteKingInCheck(&temp) : isBlackKingInCheck(&temp)))
+            moves.push_back(candidate);
+        else
+            *bitboard ^= 1ULL << candidate.getTarget();
+    }
+
+    return moves;
+}
+
+std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, int piece, unsigned long long* bitboard, bool friendlyFire)
 {
     std::vector<Move> moves;
 
     int pieceColor = piece & Piece.colorMask;
 
-    if (!piece || pieceColor != board->toMove()) return moves;
+    // if (!piece || pieceColor != board->toMove()) return moves;
 
     switch (piece & Piece.typeMask)
     {
@@ -39,6 +57,9 @@ std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, int pi
             return moves;
     }
 
+    if (!friendlyFire)
+        *bitboard ^= (board->toMove() == Piece.white ? board->getWhiteBitboard() & *bitboard : board->getBlackBitboard() & *bitboard); 
+
     for (int i = 0; i < 64; i++)
     {
         if (((1ULL << i) & *bitboard) >> i)
@@ -61,8 +82,8 @@ unsigned long long MoveGenerator::attackedSquares(const Board* board, const int&
                 singlePieceBitboard = PrecomputedMoveData::whitePawnAttacks(i);
             else if (squares[i] == (Piece.black | Piece.pawn))
                 singlePieceBitboard = PrecomputedMoveData::blackPawnAttacks(i);
-            // else
-            //     getMoves(board, i, squares[i], &singlePieceBitboard);
+            else
+                getMoves(board, i, squares[i], &singlePieceBitboard, true);
             attacked |= singlePieceBitboard;
         }
     
@@ -87,15 +108,8 @@ unsigned long long MoveGenerator::generateOrthagonal(const int* board, const int
         for (int i = 1; i <= margin[j]; i++)
         {
             squareIndex = square + i * directionOffsets[j];
-            if (board[squareIndex] == 0)
-                legalMoves |= 1ULL << squareIndex;
-            else
-            {
-                if ((board[squareIndex] & Piece.colorMask) != friendlyPieceColor)
-                    legalMoves |= 1ULL << squareIndex;
-                break;
-            }
-                
+            legalMoves |= 1ULL << squareIndex;
+            if (board[squareIndex] != 0) break;  
         }
     }
 
@@ -124,14 +138,8 @@ unsigned long long MoveGenerator::generateDiagonal(const int* board, const int& 
         for (int i = 1; i <= margin[j]; i++)
         {
             squareIndex = square + i * directionOffsets[j];
-            if (board[squareIndex] == 0)
-                legalMoves |= 1ULL << squareIndex;
-            else
-            {
-                if ((board[squareIndex] & Piece.colorMask) != friendlyPieceColor)
-                    legalMoves |= 1ULL << squareIndex;
-                break;
-            }
+            legalMoves |= 1ULL << squareIndex;
+            if (board[squareIndex] != 0) break;
         }
     }
 
@@ -160,10 +168,7 @@ unsigned long long MoveGenerator::generateKing(const Board* board, const int& sq
         if (margin[j] > 0)
         {
             squareIndex = square + directionOffsets[j];
-            if (squares[squareIndex] == 0)
-                legalMoves |= 1ULL << squareIndex;
-            else if ((squares[squareIndex] & Piece.colorMask) != friendlyPieceColor)
-                legalMoves |= 1ULL << squareIndex;
+            legalMoves |= 1ULL << squareIndex;
         }
     }
 
@@ -198,8 +203,6 @@ unsigned long long MoveGenerator::generateKing(const Board* board, const int& sq
     return legalMoves;
 }
 
-
-
 unsigned long long MoveGenerator::generateKnight(const int* board, const int& square, const int& friendlyPieceColor)
 {
     unsigned long long legalMoves = 0ULL;
@@ -220,8 +223,7 @@ unsigned long long MoveGenerator::generateKnight(const int* board, const int& sq
             if (margin[k] > 1 && margin[l] > 0)
             {
                 squareIndex = square + knightOffsets[j];
-                if (board[squareIndex] == 0 || (board[squareIndex] & Piece.colorMask) != friendlyPieceColor)
-                    legalMoves |= 1ULL << squareIndex;
+                legalMoves |= 1ULL << squareIndex;
             }
             j++;
         }
@@ -234,8 +236,7 @@ unsigned long long MoveGenerator::generateKnight(const int* board, const int& sq
             if (margin[k] > 1 && margin[l] > 0)
             {
                 squareIndex = square + knightOffsets[j];
-                if (board[squareIndex] == 0 || (board[squareIndex] & Piece.colorMask) != friendlyPieceColor)
-                    legalMoves |= 1ULL << squareIndex;
+                legalMoves |= 1ULL << squareIndex;
             }
             j++;
         }
