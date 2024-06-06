@@ -12,6 +12,7 @@
 #define DARK_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .82f
 #define LIGHT_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .55f 
 #define MOVE_SQUARE_COLOR glm::vec3(0.85f, .0f, .0f) 
+#define WIN_COLOR glm::vec3(.0f, 1.0f, .0f) 
 
 SpriteRenderer *Renderer;
 Board *board;
@@ -100,7 +101,7 @@ void GameManager::processInput(float deltaTime)
                 if (board->toMove() == (Dummy.piece & Piece.colorMask))
                 {
                     unsigned long long bitboard = 0ULL;
-                    Dummy.availableMoves = MoveGenerator::getLegalMoves(board, Dummy.origin, Dummy.piece, &bitboard);
+                    Dummy.availableMoves = MoveGenerator::getLegalMoves(board, Dummy.origin, &bitboard);
 
                     Dummy.availableMovesBoard = new bool[64];
                     std::fill(Dummy.availableMovesBoard, Dummy.availableMovesBoard + 64, 0);
@@ -120,7 +121,19 @@ void GameManager::processInput(float deltaTime)
 
             int target = 63 - (Dummy.y * 8 + (7 - Dummy.x));
             if (Dummy.availableMovesBoard[target])
+            {
                 board->update(Move(Dummy.origin, target, Dummy.piece));
+
+                unsigned long long tempBitboard;
+                int i = 0;
+                do
+                    if ((board->get()[i] & Piece.colorMask) == board->toMove() 
+                         && MoveGenerator::getLegalMoves(board, i, &tempBitboard).size() != 0)
+                        break;
+                while (++i < 64);
+                if (i == 64)
+                    gameState = GAME_WIN;
+            }
 
             delete[] Dummy.availableMovesBoard;
         }
@@ -141,17 +154,27 @@ void GameManager::render()
     {
         for (int i = 0; i < 8; i++)
         {
+            int index = 63 - (j * 8 + (7 - i));
+
             // Rysowanie pola
             Renderer->drawSprite(ResourceManager::getTexture("square"), 
                                  glm::vec2(i * sizeX, j * sizeY),
                                  glm::vec2(sizeX, sizeY),
                                  .0f,
-                                 ((i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR) * (Dummy.render && Dummy.availableMovesBoard[63 - (j * 8 + (7 - i))] ? MOVE_SQUARE_COLOR : glm::vec3(1)) );
+                                 ((i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR) * (Dummy.render && Dummy.availableMovesBoard[index] ? MOVE_SQUARE_COLOR : glm::vec3(1)) );
+
+            if (gameState == GAME_WIN && ((1ULL << index) == (board->toMove() == Piece.white ? board->getBlackKingSquare() : board->getWhiteKingSquare())))
+                Renderer->drawSprite(ResourceManager::getTexture("square"),
+                                     glm::vec2(i * sizeX, j * sizeY),
+                                     glm::vec2(sizeX, sizeY),
+                                     .0f,
+                                     WIN_COLOR);
+
             
             // // Rysowanie adekwatnej figury
             const int* const squares = board->get();
-            if (squares[63 - (j * 8 + (7 - i))] != 0 && !(Dummy.render && Dummy.x == i && Dummy.y == j))
-                Renderer->drawSprite(ResourceManager::getTexture(std::to_string(squares[63 - (j * 8 + (7 - i))])),
+            if (squares[index] != 0 && !(Dummy.render && Dummy.x == i && Dummy.y == j))
+                Renderer->drawSprite(ResourceManager::getTexture(std::to_string(squares[index])),
                                      glm::vec2(i * sizeX, j * sizeY),
                                      glm::vec2(sizeX, sizeY));
         }

@@ -103,6 +103,7 @@ void Board::update(const Move move)
     else if (castleK[1] && (move.getOrigin() == 63 || move.getTarget() == 63 || move.getOrigin() == 60))
         castleK[1] = 0;
 
+
     lastMove = move;
     blackToMove = !blackToMove;
 }

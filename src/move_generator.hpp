@@ -14,9 +14,9 @@ class MoveGenerator
     public:
         MoveGenerator() = delete;
 
-        static std::vector<Move> getLegalMoves(const Board* board, int square, int piece, unsigned long long* bitboard);
+        static std::vector<Move> getLegalMoves(const Board* board, int square, unsigned long long* bitboard);
 
-        static std::vector<Move> getMoves(const Board* board, int square, int piece, unsigned long long* boolBoard, bool friendlyFire = false);
+        static std::vector<Move> getMoves(const Board* board, int square, unsigned long long* bitboard, bool friendlyFire = false);
 
         static unsigned long long attackedSquares(const Board* board, const int& friendlyPieceColor);
 
@@ -58,8 +58,6 @@ class MoveGenerator
                 return true;
             return false;
         }
-
-        static unsigned long long generateKnight(const int* board, const int& square, const int& friendlyPieceColor);
 
         static unsigned long long generatePawn(const int* board, const int& square, const int& friendlyPieceColor);
         static unsigned long long generatePawnAttacks(const Board* board, const int& square, const int& friendlyPieceColor);

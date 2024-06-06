@@ -16,9 +16,19 @@ class PrecomputedMoveData
         static unsigned long long blackPawnAttacks(int square)
             { return blackPawnAttackBitboards[square]; }
 
+        static unsigned long long kingAttacks(int square)
+            { return kingAttackBitboards[square]; }
+
+        static unsigned long long knightAttacks(int square)
+            { return knightAttackBitboards[square]; }
+
     private:
         static unsigned long long whitePawnAttackBitboards[64];
         static unsigned long long blackPawnAttackBitboards[64];
+
+        static unsigned long long kingAttackBitboards[64];
+
+        static unsigned long long knightAttackBitboards[64];
 };
 
 #endif

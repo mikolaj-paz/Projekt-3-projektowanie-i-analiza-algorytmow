@@ -62,10 +62,7 @@ class Board
         void updateBitboards(const Move& move);
 
         void loadFEN(const std::string FENstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    
-           
-        unsigned long long whiteKingSquare;
-        unsigned long long blackKingSquare;
+        
     private:
         int squares[64];
         bool blackToMove;
@@ -75,6 +72,9 @@ class Board
 
         unsigned long long whitePiecesBitboard;
         unsigned long long blackPiecesBitboard;
+
+        unsigned long long whiteKingSquare;
+        unsigned long long blackKingSquare;
 
         Move lastMove;
 };
