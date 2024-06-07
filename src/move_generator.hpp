@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
+#include <random>
+#include <chrono>
 
 #include "precomputed_move_data.hpp"
 #include "pieces.hpp"
@@ -14,11 +16,27 @@ class MoveGenerator
     public:
         MoveGenerator() = delete;
 
-        static std::vector<Move> getLegalMoves(const Board* board, int square, unsigned long long* bitboard);
+        static std::vector<Move> getAllLegalMoves(const Board* board, bool onlyCaptures = false);
 
-        static std::vector<Move> getMoves(const Board* board, int square, unsigned long long* bitboard, bool friendlyFire = false);
+        static std::vector<Move> getLegalMoves(const Board* board, int square, unsigned long long* bitboard, bool onlyCaptures = false);
+
+        static std::vector<Move> getMoves(const Board* board, int square, unsigned long long* bitboard, bool friendlyFire = false, bool onlyCaptures = false);
 
         static unsigned long long attackedSquares(const Board* board, const int& friendlyPieceColor);
+
+        static bool isWhiteKingInCheck(const Board* board)
+        {
+            if (attackedSquares(board, Piece.black) & board->getWhiteKingSquare())
+                return true;
+            return false;
+        }
+
+        static bool isBlackKingInCheck(const Board* board)
+        {
+            if (attackedSquares(board, Piece.white) & board->getBlackKingSquare())
+                return true;
+            return false;
+        }
 
     private:
         static const int directionOffsets[8];
@@ -44,20 +62,6 @@ class MoveGenerator
         static unsigned long long generateDiagonal(const int* board, const int& square, const int& friendlyPieceColor);
 
         static unsigned long long generateKing(const Board* board, const int& square, const int& friendlyPieceColor);
-
-        static bool isWhiteKingInCheck(const Board* board)
-        {
-            if (attackedSquares(board, Piece.black) & board->getWhiteKingSquare())
-                return true;
-            return false;
-        }
-
-        static bool isBlackKingInCheck(const Board* board)
-        {
-            if (attackedSquares(board, Piece.white) & board->getBlackKingSquare())
-                return true;
-            return false;
-        }
 
         static unsigned long long generatePawn(const int* board, const int& square, const int& friendlyPieceColor);
         static unsigned long long generatePawnAttacks(const Board* board, const int& square, const int& friendlyPieceColor);

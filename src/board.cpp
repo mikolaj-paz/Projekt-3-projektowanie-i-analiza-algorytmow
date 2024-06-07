@@ -1,6 +1,6 @@
 #include "board.hpp"
 
-Board::Board(): lastMove{Move(0,0,0)}, whitePiecesBitboard{0ULL}, blackPiecesBitboard{0ULL}
+Board::Board(): lastMove{Move(0,0,0,0)}, whitePiecesBitboard{0ULL}, blackPiecesBitboard{0ULL}
 {
     std::fill(squares, squares + 64, 0);
     loadFEN();
@@ -95,13 +95,13 @@ void Board::update(const Move move)
 
     // Blokowanie roszady
     if (castleQ[0] && (move.getOrigin() == 0 || move.getTarget() == 0 || move.getOrigin() == 4))
-        castleQ[0] = 0;
-    else if (castleK[0] && (move.getOrigin() == 7 || move.getTarget() == 7 || move.getOrigin() == 4))
-        castleK[0] = 0;
-    else if (castleQ[1] && (move.getOrigin() == 56 || move.getTarget() == 56 || move.getOrigin() == 60))
-        castleQ[1] = 0;
-    else if (castleK[1] && (move.getOrigin() == 63 || move.getTarget() == 63 || move.getOrigin() == 60))
-        castleK[1] = 0;
+        castleQ[0] = false;
+    if (castleK[0] && (move.getOrigin() == 7 || move.getTarget() == 7 || move.getOrigin() == 4))
+        castleK[0] = false;
+    if (castleQ[1] && (move.getOrigin() == 56 || move.getTarget() == 56 || move.getOrigin() == 60))
+        castleQ[1] = false;
+    if (castleK[1] && (move.getOrigin() == 63 || move.getTarget() == 63 || move.getOrigin() == 60))
+        castleK[1] = false;
 
 
     lastMove = move;

@@ -1,7 +1,7 @@
 #ifndef PIECES_HPP
 #define PIECES_HPP
 
-const struct
+static const struct
 {
     const int none = 0;
     const int pawn = 1;

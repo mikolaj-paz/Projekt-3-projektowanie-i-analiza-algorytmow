@@ -7,11 +7,14 @@ add_subdirectory( "lib/glfw" )
 add_subdirectory( "lib/glad" )
 add_subdirectory( "lib/glm" )
 
+add_compile_options( -O3 )
+
 add_executable( a WIN32 
                 "src/main.cpp"
                 "src/precomputed_move_data.cpp"
                 "src/board.cpp"
                 "src/move_generator.cpp"
+                "src/bot.cpp"
                 "src/shader.cpp"
                 "src/texture.cpp"
                 "src/resource_manager.cpp"

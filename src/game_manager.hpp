@@ -1,10 +1,31 @@
 #ifndef GAME_MANAGER_HPP
 #define GAME_MANAGER_HPP
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <string>
+#include <thread>
+#include <atomic>
+
+#include <fstream>
+
+#include "resource_manager.hpp"
+#include "sprite_renderer.hpp"
+#include "move_generator.hpp"
+#include "bot.hpp"
+
+#include "board.hpp"
+
 enum GameState
 {
     GAME_ACTIVE,
     GAME_WIN
+};
+
+enum BotState
+{
+    IDLING,
+    THINKING
 };
 
 class GameManager
@@ -15,7 +36,7 @@ class GameManager
 
     public:
         GameManager(const unsigned int& width, const unsigned int& height):
-            gameState{GAME_ACTIVE}, width{width}, height{height} {}
+            gameState{GAME_ACTIVE}, botState{IDLING}, width{width}, height{height} {}
 
         ~GameManager();
 
@@ -24,9 +45,6 @@ class GameManager
         void update(float deltaTime);
         void render();
 
-        const GameState& getState() const
-            { return gameState; }
-
         const unsigned int& getWidth() const
             { return width; }
 
@@ -34,7 +52,10 @@ class GameManager
             { return height; }
 
     private:
-        GameState gameState;
+        std::atomic<GameState> gameState;
+
+        std::atomic<BotState> botState;
+
         unsigned int width, height;
 };
 

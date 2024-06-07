@@ -7,12 +7,30 @@ const int MoveGenerator::pawnOffsets[6] = { 7, 8, 9, -9, -8, -7 };
 const unsigned long long MoveGenerator::pawnStart[2] = { 0xFF00, 0xFF000000000000 };
 const unsigned long long MoveGenerator::pawnPromotion[2] = { 0xFF00000000000000, 0xFF };
 
-std::vector<Move> MoveGenerator::getLegalMoves(const Board* board, int square, unsigned long long* bitboard)
+std::vector<Move> MoveGenerator::getAllLegalMoves(const Board* board, bool onlyCaptures)
+{
+    std::vector<Move> moves;
+
+    const int toMove = board->toMove();
+    const int* squares = board->get();
+
+    for (int i = 0; i < 64; i++)
+        if ((squares[i] & Piece.colorMask) == toMove)
+        {
+            unsigned long long squareBitboard = 0ULL;
+            std::vector<Move> squareMoves = MoveGenerator::getLegalMoves(board, i, &squareBitboard, onlyCaptures);
+            moves.insert(moves.end(), squareMoves.begin(), squareMoves.end());
+        }
+
+    return moves;
+}
+
+std::vector<Move> MoveGenerator::getLegalMoves(const Board* board, int square, unsigned long long* bitboard, bool onlyCaptures)
 {
     std::vector<Move> moves;
 
     int piece = board->get()[square]; 
-    std::vector<Move> candidates = getMoves(board, square, bitboard);
+    std::vector<Move> candidates = getMoves(board, square, bitboard, false, onlyCaptures);
 
     for (auto & candidate : candidates)
     {
@@ -27,12 +45,13 @@ std::vector<Move> MoveGenerator::getLegalMoves(const Board* board, int square, u
     return moves;
 }
 
-std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, unsigned long long* bitboard, bool friendlyFire)
+std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, unsigned long long* bitboard, bool friendlyFire, bool onlyCaptures)
 {
     std::vector<Move> moves;
 
     int piece = board->get()[square];
     int pieceColor = piece & Piece.colorMask;
+    int toMove = board->toMove();
 
     switch (piece & Piece.typeMask)
     {
@@ -59,12 +78,15 @@ std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, unsign
     }
 
     if (!friendlyFire)
-        *bitboard ^= (board->toMove() == Piece.white ? board->getWhiteBitboard() & *bitboard : board->getBlackBitboard() & *bitboard); 
+        *bitboard ^= (toMove == Piece.white ? board->getWhiteBitboard() & *bitboard : board->getBlackBitboard() & *bitboard);
+    
+    if (onlyCaptures)
+        *bitboard &= (toMove == Piece.white ? board->getBlackBitboard() : board->getWhiteBitboard());
 
     for (int i = 0; i < 64; i++)
     {
         if (((1ULL << i) & *bitboard) >> i)
-            moves.push_back(Move(square, i, piece));
+            moves.push_back(Move(square, i, piece, board->get()[i]));
     }
 
     return moves;
@@ -154,6 +176,12 @@ unsigned long long MoveGenerator::generateKing(const Board* board, const int& sq
     unsigned long long legalMoves = PrecomputedMoveData::kingAttacks(square);
     const int* squares = board->get();
 
+    if (square == 39)
+    {
+        int temp = 0;
+        temp++;
+    }
+
     // Roszady
     int squareIndex;
     if (friendlyPieceColor == Piece.white)
@@ -170,7 +198,8 @@ unsigned long long MoveGenerator::generateKing(const Board* board, const int& sq
 
         // Hetmanska
         squareIndex = square - 2;
-        if (canCastleQ && !(squares[squareIndex] + squares[squareIndex + 1]) && !(blackAttacked & (1ULL << squareIndex ^ 1ULL << squareIndex + 1)))
+        if (canCastleQ && !(squares[squareIndex] + squares[squareIndex + 1] + squares[squareIndex - 1]) 
+            && !(blackAttacked & (1ULL << squareIndex ^ 1ULL << squareIndex + 1)))
             legalMoves |= 1ULL << squareIndex;
     }
     else
@@ -187,7 +216,8 @@ unsigned long long MoveGenerator::generateKing(const Board* board, const int& sq
 
         // Hetmanska
         squareIndex = square - 2;
-        if (canCastleQ && !(squares[squareIndex] + squares[squareIndex + 1]) && !(whiteAttacked & (1ULL << squareIndex ^ 1ULL << squareIndex + 1)))
+        if (canCastleQ && !(squares[squareIndex] + squares[squareIndex + 1] + squares[squareIndex - 1]) 
+            && !(whiteAttacked & (1ULL << squareIndex ^ 1ULL << squareIndex + 1)))
             legalMoves |= 1ULL << squareIndex;
     }
 

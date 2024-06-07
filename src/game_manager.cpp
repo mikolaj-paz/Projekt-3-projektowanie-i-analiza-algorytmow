@@ -1,13 +1,4 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <string>
-
 #include "game_manager.hpp"
-#include "resource_manager.hpp"
-#include "sprite_renderer.hpp"
-#include "move_generator.hpp"
-
-#include "board.hpp"
 
 #define DARK_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .82f
 #define LIGHT_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .55f 
@@ -98,7 +89,7 @@ void GameManager::processInput(float deltaTime)
             }
             else
             {
-                if (board->toMove() == (Dummy.piece & Piece.colorMask))
+                if (board->toMove() == (Dummy.piece & Piece.colorMask) && board->toMove() == Piece.white)
                 {
                     unsigned long long bitboard = 0ULL;
                     Dummy.availableMoves = MoveGenerator::getLegalMoves(board, Dummy.origin, &bitboard);
@@ -122,7 +113,7 @@ void GameManager::processInput(float deltaTime)
             int target = 63 - (Dummy.y * 8 + (7 - Dummy.x));
             if (Dummy.availableMovesBoard[target])
             {
-                board->update(Move(Dummy.origin, target, Dummy.piece));
+                board->update(Move(Dummy.origin, target, Dummy.piece, board->get()[target]));
 
                 unsigned long long tempBitboard;
                 int i = 0;
@@ -140,9 +131,28 @@ void GameManager::processInput(float deltaTime)
     }
 }
 
+void botThink(Board* board, std::atomic<GameState>* gameState, std::atomic<BotState>* botState)
+{   
+    if (!Bot::makeMove(board))
+        *gameState = GAME_WIN;
+
+    std::ofstream output("../data.txt");
+    output << Bot::iterations << '\n' << Bot::time / Bot::iterations << std::endl;
+    output.close();
+
+    *botState = IDLING;
+}
+
 void GameManager::update(float deltaTime)
 {
+    if (board->toMove() == Piece.black && botState == IDLING)
+    {
+        botState = THINKING;
+        std::thread(botThink, board, &gameState, &botState).detach();
 
+        // if (!Bot::makeMove(board))
+        //     gameState = GAME_WIN;
+    }
 }
 
 void GameManager::render()
