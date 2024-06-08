@@ -263,8 +263,8 @@ unsigned long long MoveGenerator::generatePawnAttacks(const Board* board, const 
         if (squares[squareIndex] != 0 && (squares[squareIndex] & Piece.colorMask) != friendlyPieceColor)
             legalMoves |= 1ULL << squareIndex;
         // en passant
-        else if ((squares[squareIndex] == 0
-                  && squares[square - 1] & Piece.typeMask) == Piece.pawn
+        else if (squares[squareIndex] == 0
+                  && (squares[square - 1] & Piece.typeMask) == Piece.pawn
                   && board->getLastMove().getTarget() == square - 1
                   && abs(board->getLastMove().getTarget() - board->getLastMove().getOrigin()) == 16)
             legalMoves |= 1ULL << squareIndex;
@@ -276,8 +276,8 @@ unsigned long long MoveGenerator::generatePawnAttacks(const Board* board, const 
         if (squares[squareIndex] != 0 && (squares[squareIndex] & Piece.colorMask) != friendlyPieceColor)
             legalMoves |= 1ULL << squareIndex;
         // en passant
-        else if ((squares[squareIndex] == 0
-                  && squares[square + 1] & Piece.typeMask) == Piece.pawn
+        else if (squares[squareIndex] == 0
+                  && (squares[square + 1] & Piece.typeMask) == Piece.pawn
                   && board->getLastMove().getTarget() == square + 1
                   && abs(board->getLastMove().getTarget() - board->getLastMove().getOrigin()) == 16)
             legalMoves |= 1ULL << squareIndex;
