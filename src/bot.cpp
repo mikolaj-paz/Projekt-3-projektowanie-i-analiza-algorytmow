@@ -26,6 +26,8 @@ bool Bot::makeMove(Board* board)
     if (!candidates.size()) 
         return false;
 
+    orderMoves(board, candidates);
+
     Move* bestMove;
     int bestMoveEval = INT_MIN;
 
@@ -33,7 +35,7 @@ bool Bot::makeMove(Board* board)
     {
         Board temp = *board;
         temp.update(candidate);
-        int candidateEval = search(&temp, 3, INT_MIN + 1, INT_MAX);
+        int candidateEval = -search(&temp, 3, INT_MIN + 1, INT_MAX - 1);
         if (candidateEval > bestMoveEval)
         {
             bestMove = &candidate;
@@ -54,7 +56,7 @@ bool Bot::makeMove(Board* board)
 int Bot::search(const Board* board, const int& depth, int alpha, int beta)
 {
     if (!depth)
-        return -searchAllCaptures(board, -beta, -alpha);
+        return searchAllCaptures(board, alpha, beta);
 
     std::vector moves = MoveGenerator::getAllLegalMoves(board);
     if (!moves.size())
@@ -62,7 +64,7 @@ int Bot::search(const Board* board, const int& depth, int alpha, int beta)
         int toMove = board->toMove();
         if ((toMove == Piece.white && MoveGenerator::isWhiteKingInCheck(board))
             || (toMove == Piece.black && MoveGenerator::isBlackKingInCheck(board)))
-            return INT_MIN;
+            return INT_MIN + 1;
         return 0;
     }
     orderMoves(board, moves);
@@ -94,14 +96,6 @@ int Bot::searchAllCaptures(const Board* board, int alpha, int beta)
         alpha = eval;
 
     std::vector moves = MoveGenerator::getAllLegalMoves(board, true);
-    if (!moves.size())
-    {
-        int toMove = board->toMove();
-        if ((toMove == Piece.white && MoveGenerator::isWhiteKingInCheck(board))
-            || (toMove == Piece.black && MoveGenerator::isBlackKingInCheck(board)))
-            return INT_MIN;
-        return 0;
-    }
 
     for (auto & move : moves)
     {
@@ -129,19 +123,12 @@ inline void Bot::orderMoves(const Board* board, std::vector<Move>& moves)
 
 int Bot::evaluate(const Board* board)
 {
-    // auto start = NOW;
-
     int whiteEval = countMaterial(board, Piece.white);
     int blackEval = countMaterial(board, Piece.black);
 
     int evaluation = whiteEval - blackEval;
 
     int perspective = board->toMove() == Piece.white ? 1 : -1;
-    
-    // auto end = NOW;
-
-    // iterations++;
-    // time += DURATION(end - start).count();
 
     return evaluation * perspective;
 }
@@ -162,7 +149,7 @@ int Bot::assessMove(const Board* board, const Move& move)
     
     if ((toMove == Piece.white ? MoveGenerator::attackedSquares(board, Piece.black) : MoveGenerator::attackedSquares(board, Piece.white))
         & 1ULL << move.getTarget())
-        moveScore -= 10 * values[movePieceType];
+        moveScore -= values[movePieceType];
     
     return moveScore;
 }
