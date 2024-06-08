@@ -21,9 +21,9 @@ Shader& ResourceManager::getShader(std::string name)
     return Shaders[name];
 }
 
-Texture2D& ResourceManager::loadQuad(const int& width, std::string name)
+Texture2D& ResourceManager::loadQuad(const int& width, const int& alpha, std::string name)
 {
-    Textures[name] = loadEmptyQuad(width);
+    Textures[name] = loadEmptyQuad(width, alpha);
     return Textures[name];
 }
 
@@ -81,13 +81,18 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile, const char *
     return shader;
 }
 
-Texture2D ResourceManager::loadEmptyQuad(const int& width)
+Texture2D ResourceManager::loadEmptyQuad(const int& width, const int& alpha)
 {
     Texture2D texture;
     
     unsigned char data[width * width * 4];
-    for (auto & i : data)
-        i = 255;
+    for (int i = 0; i < width * width * 4; i++)
+    {
+        if (i % 4 == 3)
+            data[i] = alpha;
+        else
+            data[i] = 255;
+    }
 
     texture.setInternalFormat(GL_RGBA8);
     texture.setImageFormat(GL_RGBA);

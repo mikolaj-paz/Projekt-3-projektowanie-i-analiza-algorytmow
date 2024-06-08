@@ -1,9 +1,12 @@
 #include "game_manager.hpp"
 
-#define DARK_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .82f
-#define LIGHT_SQUARE_COLOR glm::vec3(.6f, .38f, .21f) / .55f 
-#define MOVE_SQUARE_COLOR glm::vec3(0.85f, .0f, .0f) 
-#define WIN_COLOR glm::vec3(.0f, 1.0f, .0f) 
+#define DARK_SQUARE_COLOR glm::vec3(.45f, .60f, .68f)
+#define LIGHT_SQUARE_COLOR glm::vec3(.85f, .88f, .9f) 
+
+#define MOVE_SQUARE_COLOR glm::vec3(2.0f, .5f, .5f) 
+#define LAST_MOVE_COLOR glm::vec3(.5f, .9f, 1.0f)
+
+#define WIN_COLOR glm::vec3(.35f, .7f, .45f) 
 
 SpriteRenderer *Renderer;
 Board *board;
@@ -56,8 +59,11 @@ void GameManager::init()
         ResourceManager::loadTexture("../assets/10_pieces.png", true, "12");
         ResourceManager::loadTexture("../assets/11_pieces.png", true, "9");
 
+        // Ladowanie tekstury szachownicy
+        ResourceManager::loadTexture("../assets/marble.jpg", false, "marble");
+
         // Ladowanie pola
-        ResourceManager::loadQuad(this->getWidth() / 8, "square");
+        ResourceManager::loadQuad(this->getWidth() / 8, 190, "square");
 }
 
 GameManager::~GameManager()
@@ -160,19 +166,32 @@ void GameManager::render()
     const int sizeY = this->getHeight() / 8;
     const int sizeX = this->getWidth() / 8;
 
+    Renderer->drawSprite(ResourceManager::getTexture("marble"),
+                         glm::vec2(.0f,.0f),
+                         glm::vec2(this->getHeight(), this->getWidth()));
+
+
+    const Move* lastMove = &board->getLastMove();
+
     for (int j = 0; j < 8; j++)
     {
         for (int i = 0; i < 8; i++)
         {
             int index = 63 - (j * 8 + (7 - i));
 
+            auto squareColor = (i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR;
+            auto specialColor = (lastMove->getOrigin() == index || lastMove->getTarget() == index) && lastMove->getPiece() != 0 ? LAST_MOVE_COLOR : glm::vec3(1.0f);
+                
+            if (Dummy.render && Dummy.availableMovesBoard[index])
+                specialColor = MOVE_SQUARE_COLOR;
+
             // Rysowanie pola
             Renderer->drawSprite(ResourceManager::getTexture("square"), 
                                  glm::vec2(i * sizeX, j * sizeY),
                                  glm::vec2(sizeX, sizeY),
                                  .0f,
-                                 ((i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR) * (Dummy.render && Dummy.availableMovesBoard[index] ? MOVE_SQUARE_COLOR : glm::vec3(1)) );
-
+                                 squareColor * specialColor);
+            
             if (gameState == GAME_WIN && ((1ULL << index) == (board->toMove() == Piece.white ? board->getBlackKingSquare() : board->getWhiteKingSquare())))
                 Renderer->drawSprite(ResourceManager::getTexture("square"),
                                      glm::vec2(i * sizeX, j * sizeY),

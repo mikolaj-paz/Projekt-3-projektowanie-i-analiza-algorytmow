@@ -26,7 +26,7 @@ class ResourceManager
         
         static Shader& getShader(std::string name);
 
-        static Texture2D& loadQuad(const int& width, std::string name);
+        static Texture2D& loadQuad(const int& width, const int& alpha, std::string name);
         
         static Texture2D& loadTexture(const char *file, bool alpha, std::string name);
         
@@ -40,7 +40,7 @@ class ResourceManager
         
         static Shader loadShaderFromFile(const char *vShaderFile, const char *fShaderFile);
 
-        static Texture2D loadEmptyQuad(const int& width);
+        static Texture2D loadEmptyQuad(const int& width, const int& alpha);
 
         static Texture2D loadTextureFromFile(const char *file, bool alpha);
 };
