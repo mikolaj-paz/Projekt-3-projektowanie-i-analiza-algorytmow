@@ -42,7 +42,7 @@ void GameManager::init()
     Renderer = new SpriteRenderer(ResourceManager::getShader("sprite"));
 
     // Tworzenie szachownicy
-    board = new Board("6k1/3K1pp1/7p/8/2r5/8/8/8 b - - 0 1");
+    board = new Board();
 
     // Kalkulacja ruchow
     PrecomputedMoveData::init();
