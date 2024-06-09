@@ -9,6 +9,7 @@
     #define BLACK 8
 #endif
 
+/// @brief Stuktura przechowujaca dane o bierkach
 static const struct
 {
     const int none = 0;

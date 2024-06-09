@@ -12,14 +12,8 @@ const int Bot::values[7] = {
     0    // king
 };
 
-double Bot::time = .0;
-int Bot::iterations = 0;
-
 void Bot::makeMove(Board* board)
 {
-    time = .0;
-    iterations = 0;
-
     std::vector<Move> candidates = MoveGenerator::getAllLegalMoves(board);
     if (!candidates.size()) 
         return;

@@ -1,6 +1,6 @@
 #include "game_manager.hpp"
 
-#define PLAYER_COLOR BLACK
+#define PLAYER_COLOR WHITE
 
 #if PLAYER_COLOR == WHITE
     #define PLAYER_INDEXING 63 - (j * 8 + (7 - i))
@@ -150,7 +150,9 @@ void botThink(Board* board, std::atomic<GameState>* gameState, std::atomic<BotSt
 
 void GameManager::update(float deltaTime)
 {
-    if (gameState == GAME_ACTIVE && botState == IDLING)
+    if (gameState == GAME_ACTIVE && botState == IDLING
+        && board->toMove() == BOT_COLOR     // Zkomentowac, jezeli ma grac BOT vs BOT
+    )
     {
         botState = THINKING;
         std::thread(botThink, board, &gameState, &botState).detach();
