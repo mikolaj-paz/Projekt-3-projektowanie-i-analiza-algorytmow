@@ -9,9 +9,6 @@
 #include "move_generator.hpp"
 #include "precomputed_move_data.hpp"
 
-#define NOW std::chrono::high_resolution_clock::now()
-#define DURATION std::chrono::duration<double, std::milli>
-
 class Bot
 {
     private:
@@ -26,7 +23,7 @@ class Bot
     public:
         Bot() = delete;
 
-        static bool makeMove(Board* board);
+        static void makeMove(Board* board);
 
         static double time;
         static int iterations;

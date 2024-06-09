@@ -6,7 +6,8 @@
 #define MOVE_SQUARE_COLOR glm::vec3(2.0f, .5f, .5f) 
 #define LAST_MOVE_COLOR glm::vec3(.5f, .9f, 1.0f)
 
-#define WIN_COLOR glm::vec3(.35f, .7f, .45f) 
+#define WIN_COLOR glm::vec3(.35f, .7f, .45f)
+#define DRAW_COLOR glm::vec3(1.0f, .65f, .4f)
 
 SpriteRenderer *Renderer;
 Board *board;
@@ -120,16 +121,7 @@ void GameManager::processInput(float deltaTime)
             if (Dummy.availableMovesBoard[target])
             {
                 board->update(Move(Dummy.origin, target, Dummy.piece, board->get()[target]));
-
-                unsigned long long tempBitboard;
-                int i = 0;
-                do
-                    if ((board->get()[i] & Piece.colorMask) == board->toMove() 
-                         && MoveGenerator::getLegalMoves(board, i, &tempBitboard).size() != 0)
-                        break;
-                while (++i < 64);
-                if (i == 64)
-                    gameState = GAME_WIN;
+                gameState = MoveGenerator::getBoardState(board);
             }
 
             delete[] Dummy.availableMovesBoard;
@@ -139,25 +131,17 @@ void GameManager::processInput(float deltaTime)
 
 void botThink(Board* board, std::atomic<GameState>* gameState, std::atomic<BotState>* botState)
 {   
-    if (!Bot::makeMove(board))
-        *gameState = GAME_WIN;
-
-    std::ofstream output("../data.txt");
-    output << Bot::iterations << '\n' << Bot::time / Bot::iterations << std::endl;
-    output.close();
-
+    Bot::makeMove(board);
+    *gameState = MoveGenerator::getBoardState(board);
     *botState = IDLING;
 }
 
 void GameManager::update(float deltaTime)
 {
-    if (board->toMove() == Piece.black && botState == IDLING)
+    if (botState == IDLING && board->toMove() == Piece.black)
     {
         botState = THINKING;
         std::thread(botThink, board, &gameState, &botState).detach();
-
-        // if (!Bot::makeMove(board))
-        //     gameState = GAME_WIN;
     }
 }
 
@@ -181,25 +165,25 @@ void GameManager::render()
 
             auto squareColor = (i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR;
             auto specialColor = (lastMove->getOrigin() == index || lastMove->getTarget() == index) && lastMove->getPiece() != 0 ? LAST_MOVE_COLOR : glm::vec3(1.0f);
-                
+            
             if (Dummy.render && Dummy.availableMovesBoard[index])
                 specialColor = MOVE_SQUARE_COLOR;
+
+            auto finalColor = squareColor * specialColor;
+
+            if (gameState == GAME_WIN && ((1ULL << index) & (board->toMove() == Piece.white ? board->getBlackKingSquare() : board->getWhiteKingSquare())))
+                finalColor = WIN_COLOR;
+            else if (gameState == GAME_DRAW && ((1ULL << index) & (board->getWhiteKingSquare() | board->getBlackKingSquare())))
+                finalColor = DRAW_COLOR;
+
 
             // Rysowanie pola
             Renderer->drawSprite(ResourceManager::getTexture("square"), 
                                  glm::vec2(i * sizeX, j * sizeY),
                                  glm::vec2(sizeX, sizeY),
                                  .0f,
-                                 squareColor * specialColor);
-            
-            if (gameState == GAME_WIN && ((1ULL << index) == (board->toMove() == Piece.white ? board->getBlackKingSquare() : board->getWhiteKingSquare())))
-                Renderer->drawSprite(ResourceManager::getTexture("square"),
-                                     glm::vec2(i * sizeX, j * sizeY),
-                                     glm::vec2(sizeX, sizeY),
-                                     .0f,
-                                     WIN_COLOR);
+                                 finalColor);
 
-            
             // // Rysowanie adekwatnej figury
             const int* const squares = board->get();
             if (squares[index] != 0 && !(Dummy.render && Dummy.x == i && Dummy.y == j))

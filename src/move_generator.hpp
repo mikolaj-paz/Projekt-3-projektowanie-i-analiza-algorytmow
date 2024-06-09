@@ -16,6 +16,8 @@ class MoveGenerator
     public:
         MoveGenerator() = delete;
 
+        static const GameState getBoardState(const Board* board);
+
         static std::vector<Move> getAllLegalMoves(const Board* board, bool onlyCaptures = false);
 
         static std::vector<Move> getLegalMoves(const Board* board, int square, unsigned long long* bitboard, bool onlyCaptures = false);

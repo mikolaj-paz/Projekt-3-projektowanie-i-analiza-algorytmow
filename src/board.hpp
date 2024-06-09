@@ -8,6 +8,13 @@
 #include "pieces.hpp"
 #include "move.hpp"
 
+enum GameState
+{
+    GAME_ACTIVE,
+    GAME_WIN,
+    GAME_DRAW
+};
+
 class Board
 {
     public:

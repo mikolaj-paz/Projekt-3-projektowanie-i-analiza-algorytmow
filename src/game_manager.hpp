@@ -16,12 +16,6 @@
 
 #include "board.hpp"
 
-enum GameState
-{
-    GAME_ACTIVE,
-    GAME_WIN
-};
-
 enum BotState
 {
     IDLING,

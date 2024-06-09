@@ -15,16 +15,14 @@ const int Bot::values[7] = {
 double Bot::time = .0;
 int Bot::iterations = 0;
 
-bool Bot::makeMove(Board* board)
+void Bot::makeMove(Board* board)
 {
     time = .0;
     iterations = 0;
 
-    auto start = NOW;
-
     std::vector<Move> candidates = MoveGenerator::getAllLegalMoves(board);
     if (!candidates.size()) 
-        return false;
+        return;
 
     orderMoves(board, candidates);
 
@@ -44,13 +42,6 @@ bool Bot::makeMove(Board* board)
     }
 
     board->update(*bestMove);
-
-    auto end = NOW;
-
-    iterations++;
-    time += DURATION(end - start).count();
-
-    return true;
 }
 
 int Bot::search(const Board* board, const int& depth, int alpha, int beta)

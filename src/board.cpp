@@ -163,7 +163,7 @@ void Board::loadFEN(const std::string FENstring)
 
     int i = 0, file = 0, rank = 7;
     char c = FENstring[i];
-    while (c != ' ')
+    while (i < FENstring.size() && c != ' ')
     {
         if (c == '/')
         {
@@ -203,13 +203,52 @@ void Board::loadFEN(const std::string FENstring)
     // Informacje dodatkowe (nieobslugiwane)
     // ----------------------------------------------------
 
-    blackToMove = false;
+    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
+    
+    // Wybor tury
+    if (c == 'w')
+        blackToMove = false;
+    else
+        blackToMove = true;
 
-    // Biale
-    castleK[0] = true;
-    castleQ[0] = true;
+    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
 
-    // Czarne
-    castleK[1] = true;
-    castleQ[1] = true;
+    // Roszady
+    castleK[0] = false;
+    castleQ[0] = false;
+    castleK[1] = false;
+    castleQ[1] = false;
+    do
+        switch (c)
+        {
+            case 'K':
+                castleK[0] = true;
+                break;
+            case 'Q':
+                castleQ[0] = true;
+                break;
+            case 'k':
+                castleK[1] = true;
+                break;
+            case 'q':
+                castleQ[1] = true;
+                break;
+        }
+    while (++i < FENstring.size() && ((c = FENstring[i]) != ' '));
+
+    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
+
+    if (c != '-')
+    {
+        int file = c - 'a';
+        c = FENstring[++i];
+        int rank = c - '0';
+
+        int targetIndex = 8 * rank + file;
+        int originIndex = targetIndex - 16;
+        if (rank == 4)
+            originIndex += 32;
+
+        lastMove = Move(originIndex, targetIndex, Piece.pawn, Piece.none);
+    }
 }

@@ -7,6 +7,32 @@ const int MoveGenerator::pawnOffsets[6] = { 7, 8, 9, -9, -8, -7 };
 const unsigned long long MoveGenerator::pawnStart[2] = { 0xFF00, 0xFF000000000000 };
 const unsigned long long MoveGenerator::pawnPromotion[2] = { 0xFF00000000000000, 0xFF };
 
+const GameState MoveGenerator::getBoardState(const Board* board)
+{
+    // Brak ruchow
+    if (!getAllLegalMoves(board).size())
+    {
+        if (board->toMove() == Piece.white)
+        {
+            // Bialy atakuje czarnego krola
+            if ((attackedSquares(board, Piece.black) & board->getWhiteKingSquare()))
+                return GAME_WIN;
+
+            // Bialy nie atakuje czarnego krola
+            return GAME_DRAW;
+        }
+
+        // Czarny atakuje bialego krola
+        if ((attackedSquares(board, Piece.white) & board->getBlackKingSquare()))
+            return GAME_WIN;
+
+        // Czarny nie atakuje bialego krola
+        return GAME_DRAW;
+    }
+
+    return GAME_ACTIVE;
+}
+
 std::vector<Move> MoveGenerator::getAllLegalMoves(const Board* board, bool onlyCaptures)
 {
     std::vector<Move> moves;
