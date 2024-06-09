@@ -21,6 +21,4 @@ add_executable( a WIN32
                 "src/sprite_renderer.cpp"
                 "src/game_manager.cpp" )
 
-# target_link_options(a PRIVATE "-lopengl32" )
-
 target_link_libraries( a glfw glad glm )

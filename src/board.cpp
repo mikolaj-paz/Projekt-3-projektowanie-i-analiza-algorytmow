@@ -1,9 +1,9 @@
 #include "board.hpp"
 
-Board::Board(): lastMove{Move(0,0,0,0)}, whitePiecesBitboard{0ULL}, blackPiecesBitboard{0ULL}
+Board::Board(const std::string FENstring): lastMove{Move(0,0,0,0)}, lastlastMove{Move(0,0,0,0)}, whitePiecesBitboard{0ULL}, blackPiecesBitboard{0ULL}, repetitionClock{0}
 {
     std::fill(squares, squares + 64, 0);
-    loadFEN();
+    loadFEN(FENstring);
 }
 
 Board& Board::operator=(const Board& other)
@@ -20,6 +20,10 @@ Board& Board::operator=(const Board& other)
     blackPiecesBitboard = other.blackPiecesBitboard;
 
     lastMove = other.lastMove;
+    lastlastMove = other.lastlastMove;
+
+    repetitionClock = other.repetitionClock;
+    halfMoveClock = other.halfMoveClock;
     
     for (int i = 0; i < 64; i++)
         squares[i] = other.squares[i];
@@ -35,6 +39,11 @@ Board& Board::operator=(const Board& other)
 void Board::update(const Move move)
 {
     updateBitboards(move);
+
+    if (squares[move.getTarget()] != 0 || move.getPiece() == Piece.pawn)
+        halfMoveClock = 0;
+    else
+        ++halfMoveClock;
 
     squares[move.getTarget()] = squares[move.getOrigin()];
     squares[move.getOrigin()] = 0;
@@ -103,7 +112,10 @@ void Board::update(const Move move)
     if (castleK[1] && (move.getOrigin() == 63 || move.getTarget() == 63 || move.getOrigin() == 60))
         castleK[1] = false;
 
+    if (lastlastMove == -move)
+        ++repetitionClock;
 
+    lastlastMove = lastMove;
     lastMove = move;
     blackToMove = !blackToMove;
 }
@@ -203,7 +215,7 @@ void Board::loadFEN(const std::string FENstring)
     // Informacje dodatkowe (nieobslugiwane)
     // ----------------------------------------------------
 
-    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
+    while ((c = FENstring[++i]) == ' ') {}
     
     // Wybor tury
     if (c == 'w')
@@ -211,7 +223,7 @@ void Board::loadFEN(const std::string FENstring)
     else
         blackToMove = true;
 
-    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
+    while ((c = FENstring[++i]) == ' ') {}
 
     // Roszady
     castleK[0] = false;
@@ -234,9 +246,9 @@ void Board::loadFEN(const std::string FENstring)
                 castleQ[1] = true;
                 break;
         }
-    while (++i < FENstring.size() && ((c = FENstring[i]) != ' '));
+    while (((c = FENstring[++i]) != ' '));
 
-    while (++i < FENstring.size() && (c = FENstring[i]) == ' ') {}
+    while ((c = FENstring[++i]) == ' ') {}
 
     if (c != '-')
     {
@@ -251,4 +263,11 @@ void Board::loadFEN(const std::string FENstring)
 
         lastMove = Move(originIndex, targetIndex, Piece.pawn, Piece.none);
     }
+
+    while ((c = FENstring[++i]) == ' ') {}
+
+    std::string halfMoveString = std::to_string(c);
+    while ((c = FENstring[++i]) != ' ')
+        halfMoveString += c;
+    halfMoveClock = std::stoi(halfMoveString);
 }

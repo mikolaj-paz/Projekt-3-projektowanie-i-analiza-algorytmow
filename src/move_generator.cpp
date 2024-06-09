@@ -29,6 +29,12 @@ const GameState MoveGenerator::getBoardState(const Board* board)
         // Czarny nie atakuje bialego krola
         return GAME_DRAW;
     }
+    else if (board->getRepetitionCount() >= 6)
+        return GAME_DRAW;
+    else if (isInsufficientMaterial(board))
+        return GAME_DRAW;
+    else if (board->getHalfmoveCount() >= 100)
+        return GAME_DRAW;
 
     return GAME_ACTIVE;
 }
@@ -310,4 +316,71 @@ unsigned long long MoveGenerator::generatePawnAttacks(const Board* board, const 
     }
 
     return legalMoves;
+}
+
+bool MoveGenerator::isInsufficientMaterial(const Board* board)
+{
+    bool whiteSquareBishop[2] = { false, false };
+    bool blackSquareBishop[2] = { false, false };
+
+    bool knightPresent = false;
+
+    const int* squares = board->get();
+    for (int rank = 0; rank < 8; rank++)
+        for (int file = 0; file < 8; file++)
+        {
+            int pieceType = squares[8 * rank + file] & Piece.typeMask;
+            int pieceColor = squares[8 * rank + file] & Piece.colorMask;
+
+            // Figura lepsza niz goniec
+            if (pieceType > 3 && pieceType != Piece.king)
+                return false;
+            
+            if (pieceType == Piece.bishop) // Gonce
+            {
+                if ((file + rank) % 2) // Goniec czarnopolowy
+                {
+                    if (pieceColor == Piece.white) // Bialy goniec czarnopolowy
+                    {
+                        if (whiteSquareBishop[1] || whiteSquareBishop[0]) // Na szachownicy znajduje sie goniec przeciwnopolowy przeciwnika lub nasz drugi
+                            return false;
+                        else
+                            blackSquareBishop[0] = true;
+                    }
+                    else // Czarny goniec czarnopolowy
+                    {
+                        if (whiteSquareBishop[0] || whiteSquareBishop[1]) // Na szachownicy znajduje sie goniec przeciwnopolowy przeciwnika lub nasz drugi
+                            return false;
+                        else
+                            blackSquareBishop[1] = true;
+                    }
+                }
+                else // Goniec bialopolowy
+                {
+                    if (pieceColor == Piece.white) // Na szachownicy znajduje sie goniec przeciwnopolowy przeciwnika lub nasz drugi
+                    {
+                        if (blackSquareBishop[1] || blackSquareBishop[0]) // Na szachownicy znajduje sie goniec przeciwnopolowy przeciwnika lub nasz drugi
+                            return false;
+                        else
+                            whiteSquareBishop[0] = true;
+                    }
+                    else
+                    {
+                        if (blackSquareBishop[0] || blackSquareBishop[1]) // Na szachownicy znajduje sie goniec przeciwnopolowy przeciwnika lub nasz drugi
+                            return false;
+                        else
+                            whiteSquareBishop[1] = true;
+                    }
+                }
+            }
+            else if (pieceType == Piece.knight)
+            {
+                if (knightPresent)
+                    return false;
+                else
+                    knightPresent = true;
+            }
+                 
+        }
+    return true;
 }

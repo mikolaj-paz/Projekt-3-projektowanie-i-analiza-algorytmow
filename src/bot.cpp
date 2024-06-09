@@ -114,6 +114,9 @@ inline void Bot::orderMoves(const Board* board, std::vector<Move>& moves)
 
 int Bot::evaluate(const Board* board)
 {
+    if (MoveGenerator::isInsufficientMaterial(board))
+        return 0;
+
     int whiteEval = countMaterial(board, Piece.white);
     int blackEval = countMaterial(board, Piece.black);
 

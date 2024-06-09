@@ -39,6 +39,8 @@ class MoveGenerator
                 return true;
             return false;
         }
+        
+        static bool isInsufficientMaterial(const Board* board);
 
     private:
         static const int directionOffsets[8];

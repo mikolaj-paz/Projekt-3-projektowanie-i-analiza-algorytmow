@@ -18,13 +18,14 @@ enum GameState
 class Board
 {
     public:
-        Board();
+        Board(const std::string FENstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
         Board(const Board& other):
             blackToMove{other.blackToMove}, 
             whiteKingSquare{other.whiteKingSquare}, blackKingSquare{other.blackKingSquare},
             whitePiecesBitboard{other.whitePiecesBitboard}, blackPiecesBitboard{other.blackPiecesBitboard},
-            lastMove{other.lastMove}
+            lastMove{other.lastMove}, lastlastMove{other.lastlastMove},
+            repetitionClock{other.repetitionClock}, halfMoveClock{other.halfMoveClock}
         {
             for (int i = 0; i < 64; i++)
                 squares[i] = other.squares[i];
@@ -66,9 +67,15 @@ class Board
         const int toMove() const
             { return blackToMove ? Piece.black : Piece.white; }
 
+        const int& getRepetitionCount() const
+            { return repetitionClock; }
+
+        const int& getHalfmoveCount() const
+            { return halfMoveClock; }
+
         void updateBitboards(const Move& move);
 
-        void loadFEN(const std::string FENstring = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        void loadFEN(const std::string FENstring);
         
     private:
         int squares[64];
@@ -84,6 +91,10 @@ class Board
         unsigned long long blackKingSquare;
 
         Move lastMove;
+        Move lastlastMove;
+
+        int repetitionClock;
+        int halfMoveClock;
 };
 
 #endif

@@ -18,6 +18,19 @@ class Move
                 isEnPassant = true;
         }
 
+        const Move operator-() const
+            { return Move(targetSquare, originSquare, piece, capturePiece); }
+
+        friend bool operator==(const Move& l, const Move& r)
+        {
+            return (
+                l.originSquare == r.originSquare &&
+                l.targetSquare == r.targetSquare &&
+                l.piece == r.piece &&
+                l.capturePiece == r.capturePiece
+            );
+        }
+
         const int& getOrigin() const
             { return originSquare; }
 

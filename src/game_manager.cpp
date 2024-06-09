@@ -1,5 +1,8 @@
 #include "game_manager.hpp"
 
+#define PLAYER_COLOR Piece.white
+#define BOT_COLOR Piece.black
+
 #define DARK_SQUARE_COLOR glm::vec3(.45f, .60f, .68f)
 #define LIGHT_SQUARE_COLOR glm::vec3(.85f, .88f, .9f) 
 
@@ -39,7 +42,7 @@ void GameManager::init()
     Renderer = new SpriteRenderer(ResourceManager::getShader("sprite"));
 
     // Tworzenie szachownicy
-    board = new Board();
+    board = new Board("6k1/3K1pp1/7p/8/2r5/8/8/8 b - - 0 1");
 
     // Kalkulacja ruchow
     PrecomputedMoveData::init();
@@ -96,7 +99,7 @@ void GameManager::processInput(float deltaTime)
             }
             else
             {
-                if (board->toMove() == (Dummy.piece & Piece.colorMask) && board->toMove() == Piece.white)
+                if (board->toMove() == (Dummy.piece & Piece.colorMask) && board->toMove() == PLAYER_COLOR)
                 {
                     unsigned long long bitboard = 0ULL;
                     Dummy.availableMoves = MoveGenerator::getLegalMoves(board, Dummy.origin, &bitboard);
@@ -138,7 +141,7 @@ void botThink(Board* board, std::atomic<GameState>* gameState, std::atomic<BotSt
 
 void GameManager::update(float deltaTime)
 {
-    if (botState == IDLING && board->toMove() == Piece.black)
+    if (gameState == GAME_ACTIVE && botState == IDLING && board->toMove() == BOT_COLOR)
     {
         botState = THINKING;
         std::thread(botThink, board, &gameState, &botState).detach();
