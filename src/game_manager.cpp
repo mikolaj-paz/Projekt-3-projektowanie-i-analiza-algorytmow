@@ -1,7 +1,16 @@
 #include "game_manager.hpp"
 
-#define PLAYER_COLOR Piece.white
-#define BOT_COLOR Piece.black
+#define PLAYER_COLOR BLACK
+
+#if PLAYER_COLOR == WHITE
+    #define PLAYER_INDEXING 63 - (j * 8 + (7 - i))
+    #define PLAYER_INDEXING_DUMMY 63 - (Dummy.y * 8 + (7 - Dummy.x))
+    #define BOT_COLOR Piece.black
+#else
+    #define PLAYER_INDEXING j * 8 + (7 - i)
+    #define PLAYER_INDEXING_DUMMY Dummy.y * 8 + (7 - Dummy.x)
+    #define BOT_COLOR Piece.white
+#endif
 
 #define DARK_SQUARE_COLOR glm::vec3(.45f, .60f, .68f)
 #define LIGHT_SQUARE_COLOR glm::vec3(.85f, .88f, .9f) 
@@ -90,7 +99,7 @@ void GameManager::processInput(float deltaTime)
         {
             // Drag
 
-            Dummy.origin = 63 - (Dummy.y * 8 + (7 - Dummy.x));
+            Dummy.origin = PLAYER_INDEXING_DUMMY;
             Dummy.piece = board->get()[Dummy.origin];
             if (Dummy.piece == 0) 
             {
@@ -120,7 +129,7 @@ void GameManager::processInput(float deltaTime)
         {
             // Drop
 
-            int target = 63 - (Dummy.y * 8 + (7 - Dummy.x));
+            int target = PLAYER_INDEXING_DUMMY;
             if (Dummy.availableMovesBoard[target])
             {
                 board->update(Move(Dummy.origin, target, Dummy.piece, board->get()[target]));
@@ -141,7 +150,7 @@ void botThink(Board* board, std::atomic<GameState>* gameState, std::atomic<BotSt
 
 void GameManager::update(float deltaTime)
 {
-    if (gameState == GAME_ACTIVE && botState == IDLING && board->toMove() == BOT_COLOR)
+    if (gameState == GAME_ACTIVE && botState == IDLING)
     {
         botState = THINKING;
         std::thread(botThink, board, &gameState, &botState).detach();
@@ -164,7 +173,7 @@ void GameManager::render()
     {
         for (int i = 0; i < 8; i++)
         {
-            int index = 63 - (j * 8 + (7 - i));
+            int index = PLAYER_INDEXING;
 
             auto squareColor = (i + j) % 2 ? DARK_SQUARE_COLOR : LIGHT_SQUARE_COLOR;
             auto specialColor = (lastMove->getOrigin() == index || lastMove->getTarget() == index) && lastMove->getPiece() != 0 ? LAST_MOVE_COLOR : glm::vec3(1.0f);
@@ -197,7 +206,7 @@ void GameManager::render()
     }
 
     if (Dummy.render)
-        Renderer->drawSprite(ResourceManager::getTexture(std::to_string(board->get()[63 - (Dummy.y * 8 + (7 - Dummy.x))])),
+        Renderer->drawSprite(ResourceManager::getTexture(std::to_string(board->get()[PLAYER_INDEXING_DUMMY])),
                              glm::vec2(mouseX - (sizeX / 2), mouseY - (sizeY / 2)),
                              glm::vec2(sizeX, sizeY));
 }
