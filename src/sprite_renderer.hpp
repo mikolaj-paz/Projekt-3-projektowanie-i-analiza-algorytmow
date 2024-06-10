@@ -16,20 +16,27 @@
 #include "texture.hpp"
 #include "shader.hpp"
 
+/// @brief Klasa zajmujaca sie wyswietlaniem sprite'ow
 class SpriteRenderer
 {
     public:
-        // Constructor (inits shaders/shapes)
+        /// @brief Domyslny konstruktor, inicjuje shader'y, ksztalty.
+        /// @param shader shader uzywany do generowania
         SpriteRenderer(Shader &shader);
-        // Destructor
+        
         ~SpriteRenderer();
-        // Renders a defined quad textured with given sprite
+        
+        /// @brief Rysuje zdefiniowanego sprite'a.
+        /// @param texture tekstura sprite'a
+        /// @param position pozycja na ekranie
+        /// @param size rozmiar
+        /// @param rotate obrot
+        /// @param color kolor
         void drawSprite(Texture2D &texture, glm::vec2 position, glm::vec2 size = glm::vec2(10.0f, 10.0f), float rotate = 0.0f, glm::vec3 color = glm::vec3(1.0f));
     private:
-        // Render state
-        Shader shader; 
-        unsigned int quadVAO;
-        // Initializes and configures the quad's buffer and vertex attributes
+        Shader shader;          // Shader przypisany do generatora
+        unsigned int quadVAO;   // Vertex array object
+
         void initRenderData();
 };
 

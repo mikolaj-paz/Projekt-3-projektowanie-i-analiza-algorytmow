@@ -94,13 +94,13 @@ std::vector<Move> MoveGenerator::getMoves(const Board* board, int square, unsign
             *bitboard = PrecomputedMoveData::knightAttacks(square);
             break;
         case 3:
-            *bitboard = generateDiagonal(board->get(), square, pieceColor);
+            *bitboard = generateDiagonal(board->get(), square);
             break;
         case 4:
-            *bitboard = generateOrthagonal(board->get(), square, pieceColor);
+            *bitboard = generateOrthagonal(board->get(), square);
             break;
         case 5:
-            *bitboard = generateOrthagonal(board->get(), square, pieceColor) | generateDiagonal(board->get(), square, pieceColor);
+            *bitboard = generateOrthagonal(board->get(), square) | generateDiagonal(board->get(), square);
             break;
         case 6:
             *bitboard = generateKing(board, square, pieceColor);
@@ -147,7 +147,7 @@ unsigned long long MoveGenerator::attackedSquares(const Board* board, const int&
     return attacked;
 }
 
-unsigned long long MoveGenerator::generateOrthagonal(const int* board, const int& square, const int& friendlyPieceColor)
+unsigned long long MoveGenerator::generateOrthagonal(const int* board, const int& square)
 {
     unsigned long long legalMoves = 0ULL;
 
@@ -173,7 +173,7 @@ unsigned long long MoveGenerator::generateOrthagonal(const int* board, const int
     return legalMoves;
 }
 
-unsigned long long MoveGenerator::generateDiagonal(const int* board, const int& square, const int& friendlyPieceColor)
+unsigned long long MoveGenerator::generateDiagonal(const int* board, const int& square)
 {
     unsigned long long legalMoves = 0ULL;
 

@@ -27,7 +27,7 @@ void Bot::makeMove(Board* board)
     {
         Board temp = *board;
         temp.update(candidate);
-        int candidateEval = -search(&temp, 3, INT_MIN + 1, INT_MAX - 1);
+        int candidateEval = -search(&temp, 2, INT_MIN + 1, INT_MAX - 1);
         if (candidateEval > bestMoveEval)
         {
             bestMove = &candidate;

@@ -6,7 +6,7 @@
 #include "game_manager.hpp"
 #include "resource_manager.hpp"
 
-#define INIT_WIDTH 600
+#define INIT_WIDTH 800
 
 // Funkcja wykonujaca sie przy przycisnieciu przycisku myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
@@ -45,8 +45,12 @@ int main()
     // Ustawienie okna roboczego
     glViewport(0, 0, INIT_WIDTH, INIT_WIDTH);
 
+    // Ustawienie mieszania (umozliwa przezroczyste tekstury)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // VSync
+    glfwSwapInterval(1);
 
     // Ustawienie funkcji wykonujacej sie przy przycisnieciu przycisku myszy
     glfwSetMouseButtonCallback(window, mouse_button_callback);
