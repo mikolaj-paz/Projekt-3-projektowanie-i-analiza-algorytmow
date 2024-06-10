@@ -1,5 +1,6 @@
 #include "game_manager.hpp"
 
+// Ustawienie strony gracza lub perspektywy
 #define PLAYER_COLOR WHITE
 
 #if PLAYER_COLOR == WHITE

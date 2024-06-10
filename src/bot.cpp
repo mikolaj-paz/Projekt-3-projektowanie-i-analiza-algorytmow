@@ -1,5 +1,8 @@
 #include "bot.hpp"
 
+// Wstepna glebokosc przeszukiwania min-max (w rezultacie moze byc wieksza niz podana)
+#define INITIAL_DEPTH 2
+
 Board* Bot::boardPtr = nullptr;
 
 const int Bot::values[7] = {
@@ -27,7 +30,7 @@ void Bot::makeMove(Board* board)
     {
         Board temp = *board;
         temp.update(candidate);
-        int candidateEval = -search(&temp, 2, INT_MIN + 1, INT_MAX - 1);
+        int candidateEval = -search(&temp, INITIAL_DEPTH, INT_MIN + 1, INT_MAX - 1);
         if (candidateEval > bestMoveEval)
         {
             bestMove = &candidate;
